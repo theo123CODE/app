@@ -22,12 +22,22 @@ export default function LoginScreen() {
     setError('');
     setLoading(true);
 
-    const result = mode === 'login' ? await signIn(email, password) : await signUp(email, password);
-
-    if (result.error) {
-      setError(result.error);
-    } else if (mode === 'signup') {
-      router.replace('/(auth)/onboarding');
+    if (mode === 'signup') {
+      const result = await signUp(email, password);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setError('');
+        setLoading(false);
+        router.replace('/(auth)/onboarding');
+        return;
+      }
+    } else {
+      const result = await signIn(email, password);
+      if (result.error) {
+        setError(result.error);
+      }
+      // After login, _layout.tsx handles redirect via useEffect
     }
     setLoading(false);
   };

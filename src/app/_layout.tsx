@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { supabase } from '../lib/supabase';
@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/auth';
 import { colors } from '../constants/theme';
 
 export default function RootLayout() {
-  const { session, loading, setSession, loadUser } = useAuthStore();
+  const { session, user, loading, setSession, loadUser } = useAuthStore();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -22,6 +22,22 @@ export default function RootLayout() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Redirect based on auth state
+  useEffect(() => {
+    if (loading) return;
+
+    if (session && !user) {
+      // Logged in but no profile yet → onboarding
+      router.replace('/(auth)/onboarding');
+    } else if (session && user) {
+      // Logged in with profile → dashboard
+      router.replace('/(tabs)');
+    } else if (!session) {
+      // Not logged in → login
+      router.replace('/(auth)');
+    }
+  }, [loading, session, user]);
 
   if (loading) {
     return (
@@ -41,7 +57,6 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.bg.primary },
           animation: 'fade',
         }}
-        initialRouteName={session ? '(tabs)' : '(auth)'}
       >
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
