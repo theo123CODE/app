@@ -41,12 +41,10 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.bg.primary },
           animation: 'fade',
         }}
+        initialRouteName={session ? '(tabs)' : '(auth)'}
       >
-        {!session ? (
-          <Stack.Screen name="(auth)" />
-        ) : (
-          <Stack.Screen name="(tabs)" />
-        )}
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
       </Stack>
     </>
   );
